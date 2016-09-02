@@ -62,8 +62,6 @@ def get_data(forecast):
     now = arrow.now(location_data['timezone'])
     location_data['todayDate'] = now
 
-    print (location_data)
-
     today_conditions = {
     'sunrise': now.replace(hour= int(sunphase['sunrise']['hour']),minute= int(sunphase['sunrise']['minute']), second= 0, microsecond= 0, tzinfo= location_data['timezone']),
     'sunset': now.replace(hour= int(sunphase['sunset']['hour']),minute= int(sunphase['sunset']['minute']), second= 0, microsecond= 0, tzinfo= location_data['timezone']),
