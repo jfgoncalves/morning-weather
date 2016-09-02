@@ -4,6 +4,7 @@ import os
 import yaml
 import requests
 import arrow
+from multi_key_dict import multi_key_dict
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -66,36 +67,27 @@ def get_data(forecast):
         return (todayConditions)
 
 def get_iconfile(icon):
-    if icon in ('clear', 'sunny'):
-        filename = 'clear-day'
-    elif icon in ('nt_clear', 'nt_sunny'):
-        filename = 'clear-night'
-    elif icon in ('rain', 'chancerain', 'nt_rain', 'nt_chancerain'):
-        filename = 'rain'
-    elif icon in ('snow', 'chancesnow', 'flurries', 'chanceflurries'):
-        filename = 'snow-day'
-    elif icon in ('nt_snow', 'nt_chancesnow', 'nt_flurries', 'nt_chanceflurries'):
-        filename = 'snow-night'
-    elif icon in ('mostlysunny', 'partlysunny', 'partlycloudy'):
-        filename = 'partly-cloudy-day'
-    elif icon in ('nt_mostlysunny', 'nt_partlysunny', 'nt_partlycloudy'):
-        filename = 'partly-cloudy-night'
-    elif icon in ('cloudy', 'mostlycloudy'):
-        filename = 'cloudy'
-    elif icon in ('nt_cloudy', 'nt_mostlycloudy'):
-        filename = 'cloudy-night'
-    elif icon in ('sleet', 'chancesleet', 'nt_sleet', 'nt_chancesleet'):
-        filename = 'sleet'
-    elif icon in ('tstorms', 'chancetstorms', 'nt_tstorms', 'nt_chancetstorms'):
-        filename = 'thunderstorm'
-    elif icon in ('fog', 'haze', 'nt_fog', 'nt_haze'):
-        filename = 'fog'
-    else:
-        filename = 'notfound'
-        print ("Error: unknown condition: '%s'" % icon)
 
-    filename = filename + '.png'
-    return (filename)
+    icons = multi_key_dict()
+    icons['clear', 'sunny'] = 'clear-day'
+    icons['nt_clear', 'nt_sunny'] = 'clear-night'
+    icons['rain', 'chancerain', 'nt_rain', 'nt_chancerain'] = 'rain'
+    icons['snow', 'chancesnow', 'flurries', 'chanceflurries'] = 'snow-day'
+    icons['nt_snow', 'nt_chancesnow', 'nt_flurries', 'nt_chanceflurries'] = 'snow-night'
+    icons['mostlysunny', 'partlysunny', 'partlycloudy'] = 'partly-cloudy-day'
+    icons['nt_mostlysunny', 'nt_partlysunny', 'nt_partlycloudy'] = 'partly-cloudy-night'
+    icons['cloudy', 'mostlycloudy'] = 'cloudy'
+    icons['nt_cloudy', 'nt_mostlycloudy'] = 'cloudy-night'
+    icons['sleet', 'chancesleet', 'nt_sleet', 'nt_chancesleet'] = 'sleet'
+    icons['tstorms', 'chancetstorms', 'nt_tstorms', 'nt_chancetstorms'] = 'thunderstorm'
+    icons['fog', 'haze', 'nt_fog', 'nt_haze'] = 'fog'
+
+    filename = icons.get(icon, None)
+    if filename is None:
+        print ("Error: Filename not found. Unknown weather condition: '%s'" % icon)
+        return ('notfound.png')
+    else:
+        return (filename+'.png')
 
 def send_email(credentials, data):
     if data is None:
@@ -137,5 +129,4 @@ if __name__ == "__main__":
         print ('Weather Underground API unavailable.')
     else:
         today = get_data(forecast)
-        today = parse_data(today)
         send_email(cfg, today)
