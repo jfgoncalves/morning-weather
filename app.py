@@ -31,69 +31,39 @@ def get_forecast(key, pws, lang):
     else:
         return (None)
 
-def get_hourly_conditions(hourly_data, event):
+def get_hourly_conditions(hourly_data, sunrise):
 
-    event = str(event.replace(minute= 0).timestamp)
-    hours = next((hours for hours in hourly_data if hours['FCTTIME']['epoch'] == event), None)
-
-    if hours is None:
-        hourly_conditions = hours
-    else:
-        hourly_conditions = {
-        'summary': hours['condition'],
-        'icon': hours['icon'],
-        'precipProbability': hours['pop'],
-        'temperature': hours['temp']['metric'],
-        'windSpeed': hours['wspd']['metric'],
-        'windDirection': hours['wdir']['dir'],
-        'cloudCover': hours['sky'],
-        'uvIndex': hours['uvi']
-        }
-
-    return (hourly_conditions)
+    morningConditions = next((hours for hours in hourly_data if hours['FCTTIME']['hour'] == sunrise), None)
+    return (morningConditions)
 
 def get_data(forecast):
 
     sunphase = forecast['sun_phase']
-    today_forecast = forecast['forecast']['simpleforecast']['forecastday'][0]
+    todayForecast = forecast['forecast']['simpleforecast']['forecastday'][0]
+    tz = forecast['current_observation']['local_tz_long']
 
-    location_data = {'timezone': forecast['current_observation']['local_tz_long']}
+    morningConditions = get_hourly_conditions(forecast['hourly_forecast'], sunphase['sunrise']['hour'])
+    now = arrow.get(morningConditions['FCTTIME']['epoch']).to(tz)
 
-    now = arrow.now(location_data['timezone'])
-    location_data['todayDate'] = now
-
-    today_conditions = {
-    'sunrise': now.replace(hour= int(sunphase['sunrise']['hour']),minute= int(sunphase['sunrise']['minute']), second= 0, microsecond= 0, tzinfo= location_data['timezone']),
-    'sunset': now.replace(hour= int(sunphase['sunset']['hour']),minute= int(sunphase['sunset']['minute']), second= 0, microsecond= 0, tzinfo= location_data['timezone']),
-    'highestTemp': today_forecast['high']['celsius'],
-    'lowestTemp': today_forecast['low']['celsius']
-    }
-
-    event_conditions = get_hourly_conditions(forecast['hourly_forecast'], today_conditions['sunrise'])
-    return (location_data, today_conditions, event_conditions)
-
-def parse_data(data):
-    if data[2] is None:
-        parsed_data = None
+    if morningConditions is None:
+        return (None)
     else:
-        parsed_data = {
-        'timezone': data[0]['timezone'],
-        'today': data[0]['todayDate'].format('D MMMM', locale='fr_fr'),
-        'summary': data[2]['summary'],
-        'sunrise': str(data[1]['sunrise'].hour)+"h"+str(data[1]['sunrise'].minute),
-        'sunset': str(data[1]['sunset'].hour)+"h"+str(data[1]['sunset'].minute),
-        'hTemp': data[1]['highestTemp'],
-        'lTemp': data[1]['lowestTemp'],
-        'icon': data[2]['icon'],
-        'chanceOfRain': data[2]['precipProbability'],
-        'temperature': data[2]['temperature'],
-        'windSpeed': data[2]['windSpeed'],
-        'windDirection': data[2]['windDirection'],
-        'cloudCover': data[2]['cloudCover'],
-        'UVIndex': data[2]['uvIndex']
+        todayConditions = {
+        'today': now.format('D MMMM', locale='fr_fr'),
+        'summary': morningConditions['condition'],
+        'sunrise': sunphase['sunrise']['hour']+'h'+sunphase['sunrise']['minute'],
+        'sunset': sunphase['sunset']['hour']+'h'+sunphase['sunset']['minute'],
+        'hTemp': todayForecast['high']['celsius'],
+        'lTemp': todayForecast['low']['celsius'],
+        'icon': morningConditions['icon'],
+        'chanceOfRain': morningConditions['pop'],
+        'temperature': morningConditions['temp']['metric'],
+        'windSpeed': morningConditions['wspd']['metric'],
+        'windDirection': morningConditions['wdir']['dir'],
+        'cloudCover': morningConditions['sky'],
+        'UVIndex': morningConditions['uvi']
         }
-    return (parsed_data)
-
+        return (todayConditions)
 
 def get_iconfile(icon):
     if icon in ('clear', 'sunny'):
