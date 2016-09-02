@@ -59,7 +59,7 @@ def get_data(forecast):
 
     location_data = {'timezone': forecast['current_observation']['local_tz_long']}
 
-    now = arrow.utcnow().to(location_data['timezone'])
+    now = arrow.now(location_data['timezone'])
     location_data['todayDate'] = now
 
     print (location_data)
