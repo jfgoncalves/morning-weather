@@ -1,0 +1,13 @@
+wunderground:
+    # Register https://www.wunderground.com/weather/api/
+    key:
+    pws:
+    # See https://www.wunderground.com/weather/api/d/docs?d=language-support
+    lang:
+email:
+    smtp:
+    port:
+    to: trigger@recipe.ifttt.com
+    # If you're using Gmail, remember to create a password for an application
+    from:
+    pwd:
