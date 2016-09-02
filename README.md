@@ -7,4 +7,5 @@ Icons in /assets are a modified version of Amit Jakhu's [Dripicons - Weather Set
 Code is distributed under the [MIT License](https://github.com/jfgoncalves/morning-weather/blob/master/LICENSE).
 
 Weather data courtesy of [Weather Underground](https://www.wunderground.com/).
+
 ![Weather Underground Logo](wundergroundLogo_4c_rev_horz.jpg)
